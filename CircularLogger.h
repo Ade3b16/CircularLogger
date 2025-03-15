@@ -22,12 +22,14 @@ private:
     int frequency;
     int maxEntries;
     std::string logDirectory = "Logs";
-    std::string currentLogFile;
+    std::filesystem::path currentLogFile;
+    std::time_t nextRotationTime=0;
 
     void loadConfig();
     void saveDefaultConfig();
     void ensureLogDirectory();
     std::string generateLogFileName(const std::tm& timeInfo);
+    std::time_t calculateNextRotationTime(std::time_t currentTime);
     void rotateLogs();
 };
 

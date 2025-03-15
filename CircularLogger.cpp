@@ -31,12 +31,16 @@ void CircularLogger::log(const std::string& message) {
     fs::path logFilePath = fs::path(logDirectory) / logFileName;
 
     //check if we need to rotate files
-    if (currentLogFile != logFileName) {
+    if (nowTime >= nextRotationTime) {
+        // Generate the appropriate log file name
+        std::string logFileName = generateLogFileName(timeInfo);
+        fs::path logFilePath = fs::path(logDirectory) / logFileName;
         rotateLogs();
-        currentLogFile = logFileName;
+        currentLogFile = logFilePath;
+        nextRotationTime = calculateNextRotationTime(nowTime);
     }
 
-    std::ofstream logFile(logFilePath, std::ios::app);
+    std::ofstream logFile(currentLogFile, std::ios::app);
     logFile << std::put_time(&timeInfo, "%Y-%m-%d %H:%M:%S") << " - " << message << "\n";
 }
 
@@ -101,12 +105,36 @@ std::string CircularLogger::generateLogFileName(const std::tm& timeInfo) {
         oss << "-" << std::put_time(&timeInfo, "%H");
     }
     else if (loggingType == "minute") {
-        oss << "-" << std::put_time(&timeInfo, "%M");
+        oss << "-" << std::put_time(&timeInfo, "%H-%M");
     }
     else if (loggingType == "second") {
-        oss << "-" << std::put_time(&timeInfo, "%M-%S");
+        oss << "-" << std::put_time(&timeInfo, "%H-%M-%S");
     }
     return oss.str() + ".log";
+}
+
+/**
+ * @brief Calculates the next rotation time based on the current time.
+ * The rotation time is determined by the logging type and frequency.
+ * @param currentTime The current time as a time_t value.
+ * @return The next rotation time as a time_t value.
+ */
+std::time_t CircularLogger::calculateNextRotationTime(std::time_t currentTime) {
+    std::tm nextTime;
+    localtime_s(&nextTime, &currentTime);
+    if (loggingType == "hour") {
+        nextTime.tm_hour += frequency;
+        nextTime.tm_min = 0;
+        nextTime.tm_sec = 0;
+    }
+    else if (loggingType == "minute") {
+        nextTime.tm_min += frequency;
+        nextTime.tm_sec = 0;
+    }
+    else if (loggingType == "second") {
+        nextTime.tm_sec += frequency;
+    }
+    return std::mktime(&nextTime);
 }
 
 /**
