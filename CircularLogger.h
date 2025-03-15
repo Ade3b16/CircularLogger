@@ -13,7 +13,7 @@
 
 class CircularLogger {
 public:
-    CircularLogger(const std::string& configPath = "config.json");
+    CircularLogger(const std::string& configPath = "config.json");//default constructor
     void log(const std::string& message);
 
 private:
