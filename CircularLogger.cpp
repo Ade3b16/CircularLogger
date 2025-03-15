@@ -63,10 +63,10 @@ void CircularLogger::loadConfig() {
         frequency = configJson.value("frequency", 5);
         maxEntries = configJson.value("maxEntries", 12);
     }
-    catch (...) {
-        // If any error occurs, reset to default config
-        saveDefaultConfig();
+    catch (const std::exception& e) {
+        std::cerr << "Error loading configuration: " << e.what() << std::endl;
     }
+
 }
 
 /**
