@@ -154,7 +154,7 @@ void CircularLogger::rotateLogs() {
         });
 
     // Remove oldest files if we exceed the max allowed entries
-    while (logFiles.size() > maxEntries) {
+    while (logFiles.size() >= maxEntries) {
         fs::remove(logFiles.front());
         logFiles.erase(logFiles.begin());
     }
